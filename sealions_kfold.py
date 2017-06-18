@@ -39,7 +39,7 @@ test_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/test'
 base_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/'
 
 ignore_list = pd.read_csv('../data/miss_class.txt')['train_id'].tolist()
-
+df = pd.read_csv('../data/train.csv')
 
 # Tests
 print('No tests configured...')
@@ -66,7 +66,7 @@ for i in range(0, n_train_images):
     y_row[4] = row['pups']
     y_list.append(y_row)
 print('Images Loaded')
-print('Y_list: ' + str(len(y_list))
+print('Y_list: ' + str(len(y_list)))
 print('Image_list: ' + str(len(image_list)))
 x_train = np.asarray(image_list)
 y_train = np.asanyarray(y_list)
@@ -95,7 +95,7 @@ callbacks_list = [checkpoint]
 # Run
 datagen = ImageDataGenerator(horizontal_flip=True, vertical_flip=True, rotation_range=90)
 
-history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callback_list)
+history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callbacks_list)
 
 model.save('./models/' + str(model_name) + '.h5')
 
