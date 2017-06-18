@@ -26,7 +26,7 @@ from keras.applications import VGG16
 # Configuration
 n_classes = 5                   # amount of lion classes
 batch_size = 8
-epochs = 10                    # number of epochs (start @ 100) 150 better score
+epochs = 2                    # number of epochs (start @ 100) 150 better score
 image_size = 512                # resized img
 n_train_images = 948
 n_test_images = 18636
@@ -39,12 +39,14 @@ test_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/test'
 base_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/'
 
 ignore_list = pd.read_csv('../data/miss_class.txt')['train_id'].tolist()
-df = pd.read_csv('../data/train.csv')
+
 
 # Tests
 print('No tests configured...')
 
 # Data prep
+os.mkdir('./models/' + str(model_name))  # mk drop place for resources
+cur_work_dir = os.path.join('./models/', model_name)
 image_list = []  # store
 y_list = []      # store
 test_files = [i for i in os.listdir('../data_512/') if i.endswith('.png')]
@@ -66,7 +68,7 @@ for i in range(0, n_train_images):
     y_row[4] = row['pups']
     y_list.append(y_row)
 print('Images Loaded')
-print('Y_list: ' + str(len(y_list)))
+print('Y_list: ' + str(len(y_list))
 print('Image_list: ' + str(len(image_list)))
 x_train = np.asarray(image_list)
 y_train = np.asanyarray(y_list)
@@ -87,7 +89,7 @@ print(model.summary())
 history = model.compile(loss=keras.losses.mean_squared_error,
         optimizer= keras.optimizers.Adadelta())
 # checkpointing
-file_p = './models/best_weights.h5'
+file_p = './models/' + best_weights.h5'
 checkpoint = ModelCheckpoint(file_p, monitor='loss', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 
@@ -95,9 +97,9 @@ callbacks_list = [checkpoint]
 # Run
 datagen = ImageDataGenerator(horizontal_flip=True, vertical_flip=True, rotation_range=90)
 
-history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callbacks_list)
+history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callback_list)
 
-model.save('./models/' + str(model_name) + '.h5')
+model.save('./models/' + str(cur_work_dir) + model_name + '.h5')
 
 
 # submission
@@ -127,6 +129,6 @@ df_submission['adult_females'] = pred_arr[:,2]
 df_submission['juveniles'] = pred_arr[:,3]
 df_submission['pups'] = pred_arr[:,4]
 
-df_submission.to_csv('./submissions/' + model_name + '_submission.csv', index = False)
+df_submission.to_csv(cur_work_dir + '/' + model_name + 'submission.csv', index = False)
 print('Complete')
 # eval
