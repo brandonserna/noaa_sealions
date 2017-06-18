@@ -31,7 +31,8 @@ image_size = 512                # resized img
 n_train_images = 948
 n_test_images = 18636
 model_name = input('Name of model run: ')
-
+seed = 7
+np.random.seed(seed)
 
 train_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/train'
 validation_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/validation'
@@ -39,7 +40,7 @@ test_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/test'
 base_dir = '/media/bss/Ubuntu HDD/noaa-sealions/data_512/'
 
 ignore_list = pd.read_csv('../data/miss_class.txt')['train_id'].tolist()
-
+df = pd.read_csv('../data/train.csv')
 
 # Tests
 print('No tests configured...')
@@ -68,7 +69,7 @@ for i in range(0, n_train_images):
     y_row[4] = row['pups']
     y_list.append(y_row)
 print('Images Loaded')
-print('Y_list: ' + str(len(y_list))
+print('Y_list: ' + str(len(y_list)))
 print('Image_list: ' + str(len(image_list)))
 x_train = np.asarray(image_list)
 y_train = np.asanyarray(y_list)
@@ -79,13 +80,14 @@ print('Y Train: ' + str(y_train.shape))
 # K Fold validation
 kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
 cv_scores = []  # store
-
+#l, ct = y_train.shape
+#labels = y_train.reshape(l,)
 
 # model
 vgg16 = keras.applications.vgg16.VGG16(include_top=False, weights='imagenet', input_shape=(image_size,image_size,3))
 
 # cross validation
-for train, test in kfold.split(x_train, y_train):
+for train, test in kfold.split(x_train, y_train[:,1]):
     # custom layers
     x= Conv2D(n_classes, (1, 1), activation='relu')(vgg16.output)
     x= GlobalAveragePooling2D()(x)
@@ -96,7 +98,7 @@ for train, test in kfold.split(x_train, y_train):
     history = model.compile(loss=keras.losses.mean_squared_error,
             optimizer= keras.optimizers.Adadelta(), metrics=['accuracy'])
     # checkpointing
-    file_p = './models/' + best_weights.h5'
+    file_p = cur_work_dir + '/' + 'best_weights.h5'
     checkpoint = ModelCheckpoint(file_p, monitor='loss', verbose=1, save_best_only=True, mode='max')
     callback_list = [checkpoint]
 
@@ -109,10 +111,10 @@ for train, test in kfold.split(x_train, y_train):
     # evaluate the model
     scores = model.evaluate(x_train[test], y_train[test])
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-	cvscores.append(scores[1] * 100)
+    cv_scores.append(scores[1] * 100)
 
-print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
-model.save('./models/' + str(cur_work_dir) + model_name + '.h5')
+print("%.2f%% (+/- %.2f%%)" % (np.mean(cv_scores), np.std(cv_scores)))
+model.save(str(cur_work_dir) +'/' +  model_name + '.h5')
 
 
 # submission
