@@ -76,34 +76,48 @@ y_train = np.asanyarray(y_list)
 print('X Train: ' + str(x_train.shape))
 print('Y Train: ' + str(y_train.shape))
 
+# K Fold validation
+kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+cv_scores = []  # store
+
+
 # model
 vgg16 = keras.applications.vgg16.VGG16(include_top=False, weights='imagenet', input_shape=(image_size,image_size,3))
 
-# custom layers
-x= Conv2D(n_classes, (1, 1), activation='relu')(vgg16.output)
-x= GlobalAveragePooling2D()(x)
-model = Model(vgg16.input, x)
+# cross validation
+for train, test in kfold.split(x_train, y_train):
+    # custom layers
+    x= Conv2D(n_classes, (1, 1), activation='relu')(vgg16.output)
+    x= GlobalAveragePooling2D()(x)
+    model = Model(vgg16.input, x)
 
-print(model.summary())
+    print(model.summary())
 
-history = model.compile(loss=keras.losses.mean_squared_error,
-        optimizer= keras.optimizers.Adadelta())
-# checkpointing
-file_p = './models/' + best_weights.h5'
-checkpoint = ModelCheckpoint(file_p, monitor='loss', verbose=1, save_best_only=True, mode='max')
-callbacks_list = [checkpoint]
+    history = model.compile(loss=keras.losses.mean_squared_error,
+            optimizer= keras.optimizers.Adadelta(), metrics=['accuracy'])
+    # checkpointing
+    file_p = './models/' + best_weights.h5'
+    checkpoint = ModelCheckpoint(file_p, monitor='loss', verbose=1, save_best_only=True, mode='max')
+    callback_list = [checkpoint]
 
 
-# Run
-datagen = ImageDataGenerator(horizontal_flip=True, vertical_flip=True, rotation_range=90)
+    # Run
+    datagen = ImageDataGenerator(horizontal_flip=True, vertical_flip=True, rotation_range=90)
 
-history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callback_list)
+    history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=8), steps_per_epoch = len(x_train) / batch_size, epochs = epochs, callbacks=callback_list)
 
+    # evaluate the model
+    scores = model.evaluate(x_train[test], y_train[test])
+    print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+	cvscores.append(scores[1] * 100)
+
+print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
 model.save('./models/' + str(cur_work_dir) + model_name + '.h5')
 
 
 # submission
 #model = load_model('./models/' + 'transvgg16_100e_wAug_wAdam.h5')
+'''
 test_files = [i for i in os.listdir('../data_512/') if i.endswith('.png')]
 
 pred_arr = np.zeros((n_test_images, n_classes), np.int32)
@@ -130,5 +144,10 @@ df_submission['juveniles'] = pred_arr[:,3]
 df_submission['pups'] = pred_arr[:,4]
 
 df_submission.to_csv(cur_work_dir + '/' + model_name + 'submission.csv', index = False)
+'''
 print('Complete')
+
 # eval
+
+print('\n\nEvaluation:')
+print(history.history.keys())
