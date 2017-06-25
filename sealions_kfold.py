@@ -26,7 +26,7 @@ from keras.applications import VGG16
 # Configuration
 n_classes = 5                   # amount of lion classes
 batch_size = 8
-epochs = 2                    # number of epochs (start @ 100) 150 better score
+epochs = 100                    # number of epochs (start @ 100) 150 better score
 image_size = 512                # resized img
 n_train_images = 948
 n_test_images = 18636
@@ -119,7 +119,7 @@ model.save(str(cur_work_dir) +'/' +  model_name + '.h5')
 
 # submission
 #model = load_model('./models/' + 'transvgg16_100e_wAug_wAdam.h5')
-'''
+
 test_files = [i for i in os.listdir('../data_512/') if i.endswith('.png')]
 
 pred_arr = np.zeros((n_test_images, n_classes), np.int32)
@@ -146,7 +146,7 @@ df_submission['juveniles'] = pred_arr[:,3]
 df_submission['pups'] = pred_arr[:,4]
 
 df_submission.to_csv(cur_work_dir + '/' + model_name + 'submission.csv', index = False)
-'''
+
 print('Complete')
 
 # eval
