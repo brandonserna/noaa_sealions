@@ -1,14 +1,29 @@
 # NOAA Fisheries Steller Sea Lion Population Count
 
-Source for my adventure into finding sea lions for the recent Kaggle competition sponsored by NOAA Fisheries.
+Source for my solution into detecting and classifying Stellar Sea Lions for the recent Kaggle competition sponsored by NOAA Fisheries. This approach is using python and keras. 
 
 ### Files
 
-"noaa sealions.ipynb" — main (working) notebook
-
-"eda.ipynb" — exploratory analysis
-
-"sealions_kfold.py" — similar approach to working notebook but configured for 5 (n) fold-validation 
+```bash
+├── README.md
+├── annotated_wDotted_model.ipynb  # working with dotted photos (modified from Radu kernel) 
+├── eda.ipynb  # exploratory data analysis and other testing/verification
+├── input  # input data
+│   ├── data  # sample store for original file sizes
+│   │   ├── 41.jpg
+│   │   └── 42.jpg
+│   └── data_512  # store for modified images 512x512 (where additional dirs live (validation, etc...))
+│       ├── 41.jpg
+│       └── 42.jpg
+├── model_plot.png  # keras export of model
+├── noaa\ sealions.ipynb  # main in-progress notebook
+├── requirements.txt  # python requirements 
+├── sealions_kfold.py  # implementation with K-Fold validation (very slow)
+└── yolo  # in-progress testing of yolo v2
+    └── yad2k
+        └── Untitled\ Folder
+            └── yoloTest.ipynb
+```
 
 ### Data
 
@@ -17,10 +32,6 @@ Please resize the provided dataset to 512x512. My filepath is usually referencin
 ### Requirements
 
 I used Python 3.6 for my development on an ubuntu system with gpu support, please see the ```requirements.txt``` file for your environment setup. Adjust the tensorflow-gpu package if you will not run on a machine with a graphics card.
-
-### Contact
-
-bserna@regis.edu
 
 ### Resources
 
